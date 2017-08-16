@@ -47,11 +47,59 @@ function hex2a(hexx) {
     return str;
 }
 
+function statusByteMagnetico(b1) {
+	switch ( b1 ){
+		case "04":
+			stato = "Batteria Scarica";
+			break;
+		case "03":
+			stato = "Manomissione e porta aperta";
+			break;
+		case "02":
+			stato = "Manomissione e porta chiusa";
+			break;
+		case "01":
+			stato = "Apertura porta";
+			break;
+		case "00":
+			stato = "Chiusura porta";
+				break;
+		default:
+				break;
+			}
+	return stato;
+}
+
+function statusByteInfrarossi(b1) {
+	switch ( b1 ){
+		case "04":
+			stato = "Batteria Scarica";
+			break;
+		case "03":
+			stato = "Manomissione e Intrusione";
+			break;
+		case "02":
+			stato = "Manomissione";
+			break;
+		case "01":
+			stato = "Intrusione";
+			break;
+		case "00":
+			stato = "Tutto ok";
+			break;
+		default:
+			break;
+			}
+	return stato;
+}
+/** Sensore magnetico */
 if (msg.EUI=="0E7E346433306947" || msg.EUI=="0E7E346433306944"){
 	switch(msg.port) {
+		/** Dalla porta 5 viene consegnato un messaggio che contiene il modello del sensore */
 		case  5:
 			printed="Modello sensore: " + data;
 			break;
+		/** Dalla porta 6 viene consegnato un messaggio che contiene il numero seriale del sensore */
 		case  6:
 			printed="Numero seriale: " + data;
 			break;
@@ -60,7 +108,7 @@ if (msg.EUI=="0E7E346433306947" || msg.EUI=="0E7E346433306944"){
 		    b1 = data.substr  ( 0  , 2 );
 			b2 = data.substr  ( 2 , 2 );
 			b3 = data.substr  ( 4 , 2 );
-			/** Separatore */
+			/** Separatore, è una virgola */
 			b4 = data.substr  ( 6  , 2 );
 			/** LoRaWAN client library release */
 			b5 = data.substr  ( 8  , 2 );
@@ -68,7 +116,7 @@ if (msg.EUI=="0E7E346433306947" || msg.EUI=="0E7E346433306944"){
 			b7 = data.substr  ( 12 , 2 );
 			b8 = data.substr  ( 14 , 2 );
 			b9 = data.substr  ( 16 , 2 );
-			/** Separatore */
+			/** Separatore, è una virgola */
 			b10 = data.substr ( 18 , 2 );
 			/** Hw release */			
 			b11 = data.substr ( 20 , 2 );
@@ -90,7 +138,6 @@ if (msg.EUI=="0E7E346433306947" || msg.EUI=="0E7E346433306944"){
 			printed = (" Batteria: " + batteria + "%");
 			break;
 		case  9:
-			
 			/** Batteria */
 		    b1 = data.substr  ( 0  , 2 );
 			/** Status */
@@ -107,31 +154,11 @@ if (msg.EUI=="0E7E346433306947" || msg.EUI=="0E7E346433306944"){
 			b10 = data.substr ( 18 , 2 );
 
 			/** Operazioni sui dati */
-
 			/** Se batteria alcalina, allora togliere -128 */
 			batteria = parseInt( b1 , 16);			
 			batteria = batteria-128;
 			/** Status */
-			stato="";
-			switch ( b2 ){
-				case "04":
-					stato = "Batteria Scarica";
-					break;
-				case "03":
-					stato = "Manomissione e porta aperta";
-					break;
-				case "02":
-					stato = "Manomissione e porta chiusa";
-					break;
-				case "01":
-					stato = "Apertura porta";
-					break;
-				case "00":
-					stato = "Chiusura porta";
-					break;
-				default:
-					break;
-			}
+			stato=statusByteMagnetico(b2);
 			/** Temperatura */	
 			temperatura = littleEndianConversion(b3,b4,b5,b6);
 			temperatura = temperatura+"°C";
@@ -162,26 +189,7 @@ if (msg.EUI=="0E7E346433306947" || msg.EUI=="0E7E346433306944"){
 			/** Operazioni sui dati */
 
 			/** Status */
-			stato="";
-			switch ( b1 ){
-				case "04":
-					stato = "Batteria Scarica";
-					break;
-				case "03":
-					stato = "Manomissione e porta aperta";
-					break;
-				case "02":
-					stato = "Manomissione e porta chiusa";
-					break;
-				case "01":
-					stato = "Apertura porta";
-					break;
-				case "00":
-					stato = "Chiusura porta";
-					break;
-				default:
-					break;
-			}
+			stato=statusByteMagnetico(b1);
 			/** Contatore aperture porta */
 			count = parseInt ( b23 , 16 );
 			/** Temperatura */	
@@ -252,26 +260,7 @@ if (msg.EUI=="0E7E3464333062A6" || msg.EUI=="0E7E346433306386"){
 			/** Se batteria litio, allora aggiungere 128  */
 			batteria = parseInt( b1 , 16);
 			/** Status */
-			stato="";
-			switch ( b2 ){
-				case "04":
-					stato = "Batteria Scarica";
-					break;
-				case "03":
-					stato = "Manomissione e Intrusione";
-					break;
-				case "02":
-					stato = "Manomissione";
-					break;
-				case "01":
-					stato = "Intrusione";
-					break;
-				case "00":
-					stato = "Tutto ok";
-					break;
-				default:
-					break;
-			}
+			stato=statusByteInfrarossi(b2);
 			/** Contatore aperture porta */
 			count = parseInt ( b34 , 16 );
 			printed = (" Batteria: " + batteria + "%" + "<br>" + " Stato: " + stato + "<br>" + " Contatore: buggato -> " + count);
@@ -289,26 +278,7 @@ if (msg.EUI=="0E7E3464333062A6" || msg.EUI=="0E7E346433306386"){
 			/** Operazioni sui dati */
 
 			/** Status */
-			stato="";
-			switch ( b1 ){
-				case "04":
-					stato = "Batteria Scarica";
-					break;
-				case "03":
-					stato = "Manomissione e Intrusione";
-					break;
-				case "02":
-					stato = "Manomissione";
-					break;
-				case "01":
-					stato = "Intrusione";
-					break;
-				case "00":
-					stato = "Tutto ok";
-					break;
-				default:
-					break;
-			}
+			stato=statusByteInfrarossi(b1);
 			/** Contatore aperture porta */
 			count = parseInt ( b23 , 16 );
 			printed = (" Stato: " + stato + "<br>" +" Contatore: " + count);
